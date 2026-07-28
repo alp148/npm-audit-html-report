@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{meta.theme}}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+
+  <!-- SEO -->
+  <title>{{meta.title}} — npm Audit Security Report</title>
+  <meta name="description" content="Interactive npm audit security vulnerability report for {{meta.projectName}} generated on {{meta.generatedAt}}." />
+  <meta name="robots" content="noindex,nofollow" />
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+
+  <!-- Chart.js (CDN) -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"
+    integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3oD+sCoJrzXJ+yKwulk3EUFT6YLBV4YLiqcIGlueZuIlGFTlTENMg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+
+  <!-- Inlined CSS -->
+  <style>
+{{{inlinedCss}}}
+  </style>
+</head>
+<body>
+<!-- ══ REPORT DATA (injected for JS) ═══════════════════════ -->
+<script>
+  window.REPORT_DATA  = {{{reportDataJson}}};
+  window.REPORT_THEME = '{{meta.theme}}';
+  window.HISTORY_DATA = {{{historyDataJson}}};
+</script>
+
+<!-- ══ LAYOUT ══════════════════════════════════════════════ -->
+<div class="app-layout">
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="report-header" role="banner">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="brand-icon" aria-hidden="true">🔐</div>
+        <div class="brand-text">
+          <h1>{{meta.title}}</h1>
+          <p class="subtitle">{{meta.projectName}} · Security Audit Report</p>
+        </div>
+      </div>
+
+      <div class="header-meta" role="list" aria-label="Report metadata">
+        <span class="meta-pill" role="listitem">
+          <span class="icon">📅</span>
+          <span>{{meta.generatedAt}}</span>
+        </span>
+        <span class="meta-pill" role="listitem">
+          <span class="icon">⬡</span>
+          <span>Node {{meta.nodeVersion}}</span>
+        </span>
+        <span class="meta-pill" role="listitem">
+          <span class="icon">📦</span>
+          <span>npm {{meta.npmVersion}}</span>
+        </span>
+        <span class="meta-pill" role="listitem">
+          <span class="icon">{{#if (eq meta.auditMode 'production')}}🏭{{else}}🔍{{/if}}</span>
+          <span>{{meta.auditMode}} mode</span>
+        </span>
+      </div>
+
+      <div class="header-actions" role="toolbar" aria-label="Report actions">
+        <!-- Theme toggle -->
+        <label class="theme-toggle" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">
+          <input type="checkbox" id="theme-checkbox" {{#if (eq meta.theme 'dark')}}checked{{/if}} />
+          <span class="theme-slider"></span>
+        </label>
+
+        <!-- Export CSV -->
+        <button id="export-csv-btn" class="btn btn-ghost" aria-label="Export table as CSV">
+          <span aria-hidden="true">⬇</span> CSV
+        </button>
+
+        <!-- Print -->
+        <button id="print-btn" class="btn btn-ghost" aria-label="Print report">
+          <span aria-hidden="true">🖨</span> Print
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── MAIN ───────────────────────────────────────────── -->
+  <main class="main-content" id="main-content">
+
+    <!-- ── SUMMARY CARDS ─────────────────────────── -->
+    <section aria-labelledby="summary-heading">
+      <h2 id="summary-heading" class="section-heading">
+        <span aria-hidden="true">📊</span> Summary
+      </h2>
+      <div class="summary-grid" role="list" aria-label="Vulnerability summary by severity">
+        <div class="summary-card critical" role="listitem">
+          <div class="summary-card-icon" aria-hidden="true">🔴</div>
+          <div class="summary-card-count" data-count="{{summary.counts.critical}}">{{summary.counts.critical}}</div>
+          <div class="summary-card-label">Critical</div>
+        </div>
+        <div class="summary-card high" role="listitem">
+          <div class="summary-card-icon" aria-hidden="true">🟠</div>
+          <div class="summary-card-count" data-count="{{summary.counts.high}}">{{summary.counts.high}}</div>
+          <div class="summary-card-label">High</div>
+        </div>
+        <div class="summary-card moderate" role="listitem">
+          <div class="summary-card-icon" aria-hidden="true">🟡</div>
+          <div class="summary-card-count" data-count="{{summary.counts.moderate}}">{{summary.counts.moderate}}</div>
+          <div class="summary-card-label">Moderate</div>
+        </div>
+        <div class="summary-card low" role="listitem">
+          <div class="summary-card-icon" aria-hidden="true">🔵</div>
+          <div class="summary-card-count" data-count="{{summary.counts.low}}">{{summary.counts.low}}</div>
+          <div class="summary-card-label">Low</div>
+        </div>
+        <div class="summary-card total" role="listitem">
+          <div class="summary-card-icon" aria-hidden="true">📌</div>
+          <div class="summary-card-count" data-count="{{summary.total}}">{{summary.total}}</div>
+          <div class="summary-card-label">Total</div>
+        </div>
+        <div class="summary-card fixable" role="listitem">
+          <div class="summary-card-icon" aria-hidden="true">✅</div>
+          <div class="summary-card-count" data-count="{{summary.fixable}}">{{summary.fixable}}</div>
+          <div class="summary-card-label">Fixable</div>
+        </div>
+        <div class="summary-card non-fixable" role="listitem">
+          <div class="summary-card-icon" aria-hidden="true">⚠️</div>
+          <div class="summary-card-count" data-count="{{summary.nonFixable}}">{{summary.nonFixable}}</div>
+          <div class="summary-card-label">Non-fixable</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CHARTS ─────────────────────────────────── -->
+    {{#if (gt summary.total 0)}}
+    <section aria-labelledby="charts-heading">
+      <h2 id="charts-heading" class="section-heading">
+        <span aria-hidden="true">📈</span> Visual Overview
+      </h2>
+      <div class="charts-grid">
+        <!-- Severity distribution -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><span aria-hidden="true">🍩</span> Severity Distribution</h3>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="chart-severity" role="img" aria-label="Severity distribution donut chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fixable vs non-fixable -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><span aria-hidden="true">🔧</span> Fixable vs Non-fixable</h3>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="chart-fixable" role="img" aria-label="Fixable vs non-fixable donut chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vulnerabilities by package -->
+        <div class="card" style="grid-column: span 2">
+          <div class="card-header">
+            <h3 class="card-title"><span aria-hidden="true">📦</span> Top Affected Packages</h3>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="height:320px">
+              <canvas id="chart-packages" role="img" aria-label="Top 10 packages by vulnerability count bar chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        {{#if hasHistory}}
+        <!-- History trend -->
+        <div class="card" style="grid-column: 1 / -1">
+          <div class="card-header">
+            <h3 class="card-title"><span aria-hidden="true">📉</span> Historical Trend</h3>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="height:280px">
+              <canvas id="chart-history" role="img" aria-label="Vulnerability count over time line chart"></canvas>
+            </div>
+          </div>
+        </div>
+        {{/if}}
+      </div>
+    </section>
+    {{/if}}
+
+    <!-- ── HISTORY DIFF ───────────────────────────── -->
+    {{#if historyDiff}}
+    <section aria-labelledby="history-heading">
+      <h2 id="history-heading" class="section-heading">
+        <span aria-hidden="true">🔄</span> Changes Since Last Scan
+      </h2>
+      <div class="history-diff">
+        <div class="diff-card new-vulns">
+          <div class="diff-card-title">🆕 New Vulnerabilities ({{historyDiff.newCount}})</div>
+          {{#each historyDiff.newVulnerabilities}}
+          <div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--border-color)">
+            <span class="badge severity-{{severity}}">{{severity}}</span>
+            &nbsp;<strong>{{package}}</strong> — {{title}}
+          </div>
+          {{else}}
+          <div style="font-size:13px;color:var(--text-muted)">No new vulnerabilities 🎉</div>
+          {{/each}}
+        </div>
+        <div class="diff-card fixed-vulns">
+          <div class="diff-card-title">✅ Fixed Since Last Scan ({{historyDiff.fixedCount}})</div>
+          {{#each historyDiff.fixedVulnerabilities}}
+          <div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--border-color)">
+            <span class="badge severity-{{severity}}">{{severity}}</span>
+            &nbsp;<strong>{{package}}</strong> — {{title}}
+          </div>
+          {{else}}
+          <div style="font-size:13px;color:var(--text-muted)">No vulnerabilities fixed since last scan.</div>
+          {{/each}}
+        </div>
+      </div>
+    </section>
+    {{/if}}
+
+    <!-- ── VULNERABILITY TABLE ────────────────────── -->
+    <section aria-labelledby="vulns-heading">
+      <h2 id="vulns-heading" class="section-heading">
+        <span aria-hidden="true">🛡</span> Vulnerabilities
+        <span class="badge severity-info" style="margin-left:8px;font-size:12px">{{summary.total}}</span>
+      </h2>
+
+      {{#if (gt summary.total 0)}}
+      <!-- Toolbar -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-body" style="padding:16px">
+          <div class="toolbar" role="search" aria-label="Filter vulnerabilities">
+            <div class="search-wrapper">
+              <span class="search-icon" aria-hidden="true">🔍</span>
+              <input
+                type="search"
+                id="search-input"
+                class="search-input"
+                placeholder="Search by package, CVE, GHSA, title… (press / to focus)"
+                aria-label="Search vulnerabilities"
+                autocomplete="off"
+              />
+            </div>
+
+            <select id="severity-filter" class="filter-select" aria-label="Filter by severity">
+              <option value="all">All Severities</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="moderate">Moderate</option>
+              <option value="low">Low</option>
+              <option value="info">Info</option>
+            </select>
+
+            <select id="fixable-filter" class="filter-select" aria-label="Filter by fix availability">
+              <option value="all">All</option>
+              <option value="fixable">Fixable</option>
+              <option value="non-fixable">Non-fixable</option>
+            </select>
+
+            <select id="page-size-select" class="filter-select" aria-label="Results per page">
+              <option value="10">10 / page</option>
+              <option value="25" selected>25 / page</option>
+              <option value="50">50 / page</option>
+              <option value="100">100 / page</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div class="table-wrapper">
+          <table class="vuln-table" aria-label="Vulnerability table" aria-live="polite">
+            <thead>
+              <tr>
+                <th data-col="severity" scope="col" aria-sort="none">
+                  Severity <span class="sort-icon" aria-hidden="true">↕</span>
+                </th>
+                <th data-col="package" scope="col" aria-sort="none">
+                  Package <span class="sort-icon" aria-hidden="true">↕</span>
+                </th>
+                <th data-col="installed" scope="col" aria-sort="none">
+                  Installed <span class="sort-icon" aria-hidden="true">↕</span>
+                </th>
+                <th data-col="fixed" scope="col">Patched</th>
+                <th scope="col">CVE</th>
+                <th scope="col">GHSA</th>
+                <th data-col="fixAvailable" scope="col" aria-sort="none">
+                  Fix Available <span class="sort-icon" aria-hidden="true">↕</span>
+                </th>
+                <th scope="col">Title</th>
+                <th scope="col" style="width:36px" aria-hidden="true"></th>
+              </tr>
+            </thead>
+            <tbody id="vuln-tbody" aria-live="polite" aria-relevant="all">
+              <!-- Populated by report.js -->
+              <tr>
+                <td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted)">
+                  Loading vulnerabilities…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" role="navigation" aria-label="Table pagination">
+          <span id="pagination-info" class="pagination-info" aria-live="polite"></span>
+          <div id="pagination-controls" class="pagination-controls"></div>
+        </div>
+      </div>
+
+      {{else}}
+      <!-- Zero vulnerabilities -->
+      <div class="card">
+        <div class="empty-state">
+          <div class="empty-state-icon">🎉</div>
+          <div class="empty-state-title">No Vulnerabilities Found</div>
+          <div class="empty-state-desc">
+            Your project has no known security vulnerabilities. Keep your
+            dependencies up to date to stay secure.
+          </div>
+        </div>
+      </div>
+      {{/if}}
+    </section>
+
+  </main><!-- /main -->
+
+  <!-- ── FOOTER ─────────────────────────────────────────── -->
+  <footer class="report-footer" role="contentinfo">
+    Generated by <strong>npm-audit-html-report</strong> on {{meta.generatedAt}} ·
+    <a href="https://github.com/your-org/npm-audit-html-report" target="_blank" rel="noopener"
+       style="color:var(--accent)">View on GitHub</a>
+  </footer>
+
+</div><!-- /.app-layout -->
+
+<!-- ── Toast container (dynamically populated) ─────────── -->
+<div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ── Inlined JS ────────────────────────────────────────── -->
+<script>
+{{{inlinedJs}}}
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+{
+  "name": "npm-audit-html-report",
+  "version": "1.0.0",
+  "description": "Generate modern interactive HTML security reports from npm audit output",
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/cli.js",
+  "types": "dist/cli.d.ts",
+  "bin": {
+    "audit-report": "dist/cli.js",
+    "npm-audit-html-report": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/cli.d.ts",
+      "default": "./dist/cli.js"
+    }
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc && npm run copy-assets && npm run copy-templates",
+    "copy-assets": "copyfiles -u 1 \"src/assets/**/*\" dist",
+    "copy-templates": "copyfiles -u 2 \"src/report/templates/**/*\" dist/report",
+    "build:watch": "tsc --watch",
+    "dev": "ts-node src/cli.ts",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "prepublishOnly": "npm run lint && npm run build",
+    "audit:self": "node dist/cli.js --output reports --theme dark"
+  },
+  "keywords": [
+    "npm-audit",
+    "security",
+    "vulnerability",
+    "html-report",
+    "cli",
+    "report",
+    "audit",
+    "cve",
+    "ghsa",
+    "security-audit",
+    "npm-security",
+    "dashboard"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/npm-audit-html-report.git"
+  },
+  "homepage": "https://github.com/your-org/npm-audit-html-report#readme",
+  "bugs": {
+    "url": "https://github.com/your-org/npm-audit-html-report/issues"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^12.1.0",
+    "handlebars": "^4.7.8",
+    "open": "^9.1.0"
+  },
+  "optionalDependencies": {
+    "puppeteer": "^22.0.0"
+  },
+  "devDependencies": {
+    "@types/handlebars": "^4.1.0",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "copyfiles": "^2.4.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  }
+}

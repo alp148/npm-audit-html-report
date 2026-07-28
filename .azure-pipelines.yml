@@ -1,0 +1,35 @@
+trigger:
+  branches:
+    include:
+      - main
+      - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '22.x'
+    displayName: 'Install Node.js 22'
+
+  - script: npm ci
+    displayName: 'Install dependencies'
+
+  - script: |
+      npx npm-audit-html-report \
+        --production \
+        --output $(Build.ArtifactStagingDirectory)/reports \
+        --theme dark \
+        --title "$(Build.Repository.Name) Security Report" \
+        --fail-on high
+    displayName: 'Run npm audit HTML report'
+    continueOnError: true
+
+  - task: PublishBuildArtifacts@1
+    condition: always()
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/reports'
+      ArtifactName: 'audit-report'
+      publishLocation: 'Container'
+    displayName: 'Publish audit report artifact'

@@ -1,0 +1,26 @@
+stages:
+  - audit
+
+variables:
+  NODE_VERSION: "22"
+
+npm-audit:
+  stage: audit
+  image: node:22-alpine
+  script:
+    - npm ci
+    - npx npm-audit-html-report
+        --production
+        --output reports
+        --theme dark
+        --title "$CI_PROJECT_NAME Security Report"
+        --fail-on high
+  artifacts:
+    when: always
+    paths:
+      - reports/
+    expire_in: 30 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
