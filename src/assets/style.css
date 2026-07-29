@@ -695,6 +695,11 @@ table.vuln-table {
   font-weight: 600;
 }
 
+.fix-force {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
 .fix-no {
   color: var(--critical-color);
   font-weight: 600;

@@ -74,12 +74,21 @@ function parseV7(raw: RawAuditReportV7): NormalizedVulnerability[] {
       ? (vuln.fixAvailable as RawFixAvailable)
       : null;
 
+    const isSemVerMajor = fixInfo?.isSemVerMajor ?? false;
     const patchedVersion = fixInfo ? `${fixInfo.version}` : '';
-    const recommendation = fixAvailable
-      ? fixInfo
-        ? `npm install ${pkgName}@${fixInfo.version}`
-        : `npm audit fix`
-      : 'No fix available — review manually';
+
+    let recommendation = 'No fix available — review manually';
+    if (fixAvailable) {
+      if (isSemVerMajor) {
+        recommendation = fixInfo
+          ? `npm audit fix --force (or npm install ${pkgName}@${fixInfo.version})`
+          : `npm audit fix --force`;
+      } else {
+        recommendation = fixInfo
+          ? `npm install ${pkgName}@${fixInfo.version}`
+          : `npm audit fix`;
+      }
+    }
 
     vulns.push({
       id: `${pkgName}@${vuln.range}`,
@@ -94,6 +103,7 @@ function parseV7(raw: RawAuditReportV7): NormalizedVulnerability[] {
       vulnerableVersions: vuln.range,
       dependencyPath: vuln.nodes.join(' → '),
       fixAvailable,
+      isSemVerMajor,
       recommendation,
       cvssScore,
       cwe,
@@ -138,6 +148,7 @@ function parseV6(raw: RawAuditReportV6): NormalizedVulnerability[] {
       vulnerableVersions: advisory.vulnerable_versions,
       dependencyPath: dependencyPaths,
       fixAvailable,
+      isSemVerMajor: false,
       recommendation: advisory.recommendation,
       cvssScore: undefined,
       cwe: advisory.cwe ? [advisory.cwe] : [],

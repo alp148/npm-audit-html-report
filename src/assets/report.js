@@ -227,7 +227,9 @@
     ).join('');
 
     const fix = v.fixAvailable
-      ? `<span class="fix-yes" aria-label="Fix available">✔ Yes</span>`
+      ? v.isSemVerMajor
+        ? `<span class="fix-force" aria-label="Fix available via force" title="Major SemVer update — requires npm audit fix --force">⚡ Yes (--force)</span>`
+        : `<span class="fix-yes" aria-label="Fix available">✔ Yes</span>`
       : `<span class="fix-no" aria-label="No fix available">✖ No</span>`;
 
     const titleHtml = v.url
@@ -525,7 +527,7 @@
         v.vulnerableVersions,
         v.cve.join('; '),
         v.ghsa.join('; '),
-        v.fixAvailable ? 'Yes' : 'No',
+        v.fixAvailable ? (v.isSemVerMajor ? 'Yes (--force)' : 'Yes') : 'No',
         v.recommendation,
         v.url,
       ].map(csvEscape).join(','));

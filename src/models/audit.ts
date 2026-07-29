@@ -129,6 +129,8 @@ export interface NormalizedVulnerability {
   dependencyPath: string;
   /** Whether a fix is available */
   fixAvailable: boolean;
+  /** Whether the fix requires a SemVer major update (npm audit fix --force) */
+  isSemVerMajor?: boolean;
   /** Human-readable recommendation */
   recommendation: string;
   /** CVSS score if available */
