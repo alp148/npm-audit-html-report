@@ -1,6 +1,6 @@
 {
   "name": "npm-audit-html-report",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Generate modern interactive HTML security reports from npm audit output",
   "author": "",
   "license": "MIT",
