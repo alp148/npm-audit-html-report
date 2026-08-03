@@ -2,11 +2,11 @@ stages:
   - audit
 
 variables:
-  NODE_VERSION: "22"
+  NODE_VERSION: "26"
 
 npm-audit:
   stage: audit
-  image: node:22-alpine
+  image: node:${NODE_VERSION}-alpine
   script:
     - npm ci
     - npx npm-audit-html-report
