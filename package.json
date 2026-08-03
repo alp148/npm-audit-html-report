@@ -1,6 +1,6 @@
 {
   "name": "npm-audit-html-report",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Generate modern interactive HTML security reports from npm audit output",
   "author": "",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=26"
   },
   "scripts": {
     "build": "tsc && npm run copy-assets && npm run copy-templates",
